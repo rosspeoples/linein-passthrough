@@ -10,22 +10,22 @@ WIREPLUMBER_SCRIPT_DIR=${HOME}/.local/share/wireplumber/scripts
 
 usage() {
   cat <<'EOF'
-Usage: linein-passthrough-uninstall [--keep-wireplumber-lua]
+Usage: linein-passthrough-uninstall [--keep-wireplumber-config]
 
 Removes linein-passthrough from the current user profile.
 
 Options:
-  --keep-wireplumber-lua  Keep the optional WirePlumber Lua helper files.
+  --keep-wireplumber-config  Keep the optional WirePlumber placeholder config.
   -h, --help             Show this help.
 EOF
 }
 
-keep_wireplumber_lua=0
+keep_wireplumber_config=0
 
 while (($# > 0)); do
   case "$1" in
-    --keep-wireplumber-lua)
-      keep_wireplumber_lua=1
+    --keep-wireplumber-config)
+      keep_wireplumber_config=1
       ;;
     -h|--help)
       usage
@@ -52,7 +52,7 @@ rm -f \
   "${PIPEWIRE_DIR}/90-linein-passthrough.conf" \
   "${PIPEWIRE_DIR}/90-linein-passthrough.conf.disabled"
 
-if (( keep_wireplumber_lua == 0 )); then
+if (( keep_wireplumber_config == 0 )); then
   rm -f \
     "${WIREPLUMBER_CONF_DIR}/90-linein-passthrough.conf" \
     "${WIREPLUMBER_SCRIPT_DIR}/90-linein-passthrough.lua"
@@ -64,6 +64,6 @@ if command -v systemctl >/dev/null 2>&1; then
 fi
 
 printf 'linein-passthrough removed from %s\n' "$HOME"
-if (( keep_wireplumber_lua == 1 )); then
-  printf 'WirePlumber Lua helper was left in place.\n'
+if (( keep_wireplumber_config == 1 )); then
+  printf 'WirePlumber placeholder config was left in place.\n'
 fi

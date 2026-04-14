@@ -12,24 +12,24 @@ WIREPLUMBER_SCRIPT_DIR=${HOME}/.local/share/wireplumber/scripts
 
 usage() {
   cat <<'EOF'
-Usage: linein-passthrough-install [--with-wireplumber-lua] [--without-service]
+Usage: linein-passthrough-install [--with-wireplumber-config] [--without-service]
 
 Installs linein-passthrough into the current user profile.
 
 Options:
-  --with-wireplumber-lua  Install the optional WirePlumber Lua helper.
+  --with-wireplumber-config  Install the optional WirePlumber placeholder config.
   --without-service       Install configs and CLI only.
   -h, --help              Show this help.
 EOF
 }
 
-install_wireplumber_lua=0
+install_wireplumber_config=0
 install_service=1
 
 while (($# > 0)); do
   case "$1" in
-    --with-wireplumber-lua)
-      install_wireplumber_lua=1
+    --with-wireplumber-config)
+      install_wireplumber_config=1
       ;;
     --without-service)
       install_service=0
@@ -85,7 +85,7 @@ if (( install_service == 1 )); then
   copy_file "${PROJECT_ROOT}/systemd/linein-passthrough-refresh.service" "${SYSTEMD_DIR}/linein-passthrough-refresh.service"
 fi
 
-if (( install_wireplumber_lua == 1 )); then
+if (( install_wireplumber_config == 1 )); then
   mkdir -p "$WIREPLUMBER_CONF_DIR" "$WIREPLUMBER_SCRIPT_DIR"
   copy_file "${PROJECT_ROOT}/config/wireplumber/90-linein-passthrough.conf" "${WIREPLUMBER_CONF_DIR}/90-linein-passthrough.conf"
   rm -f "${WIREPLUMBER_SCRIPT_DIR}/90-linein-passthrough.lua"
@@ -103,6 +103,6 @@ printf 'CLI: %s\n' "${BIN_DIR}/linein-passthrough"
 printf 'Uninstall: %s\n' "${BIN_DIR}/linein-passthrough-uninstall"
 printf 'Status: run `linein-passthrough status`\n'
 
-if (( install_wireplumber_lua == 1 )); then
+if (( install_wireplumber_config == 1 )); then
   printf 'WirePlumber placeholder config installed. No Lua helper is currently needed.\n'
 fi
