@@ -43,7 +43,7 @@ require_refresh_bin() {
 }
 
 restart_audio_services() {
-  systemctl --user restart pipewire.service wireplumber.service
+  systemctl --user restart --no-block pipewire.service wireplumber.service
 }
 
 load_state() {
@@ -54,7 +54,10 @@ load_state() {
     enabled=0
     detected_node_name=
     detected_node_nick=
+    detected_node_id=
     default_sink_name=
+    virtual_sink_name=
+    virtual_sink_nick=
   fi
 }
 
@@ -71,7 +74,10 @@ cmd_disable() {
 enabled=0
 detected_node_name=''
 detected_node_nick=''
+detected_node_id=''
 default_sink_name=''
+virtual_sink_name=''
+virtual_sink_nick=''
 EOF
   restart_audio_services
   notify "Line-In Passthrough" "Disabled"
@@ -91,8 +97,11 @@ cmd_status() {
   if [[ -f "$CONFIG_FILE" ]]; then
     printf 'enabled\n'
     printf 'config: %s\n' "$CONFIG_FILE"
+    [[ -n ${detected_node_id:-} ]] && printf 'line-in id: %s\n' "$detected_node_id"
     [[ -n ${detected_node_name:-} ]] && printf 'line-in node: %s\n' "$detected_node_name"
     [[ -n ${detected_node_nick:-} ]] && printf 'line-in nick: %s\n' "$detected_node_nick"
+    [[ -n ${virtual_sink_name:-} ]] && printf 'virtual sink: %s\n' "$virtual_sink_name"
+    [[ -n ${virtual_sink_nick:-} ]] && printf 'virtual sink nick: %s\n' "$virtual_sink_nick"
     [[ -n ${default_sink_name:-} ]] && printf 'default sink: %s\n' "$default_sink_name"
   else
     printf 'disabled\n'

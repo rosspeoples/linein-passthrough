@@ -72,6 +72,7 @@ require_cmd systemctl
 require_cmd wpctl
 require_cmd pw-cli
 require_cmd jq
+require_cmd pactl
 
 mkdir -p "$BIN_DIR" "$SYSTEMD_DIR" "$PIPEWIRE_DIR"
 
@@ -87,12 +88,12 @@ fi
 if (( install_wireplumber_lua == 1 )); then
   mkdir -p "$WIREPLUMBER_CONF_DIR" "$WIREPLUMBER_SCRIPT_DIR"
   copy_file "${PROJECT_ROOT}/config/wireplumber/90-linein-passthrough.conf" "${WIREPLUMBER_CONF_DIR}/90-linein-passthrough.conf"
-  copy_file "${PROJECT_ROOT}/config/wireplumber/scripts/90-linein-passthrough.lua" "${WIREPLUMBER_SCRIPT_DIR}/90-linein-passthrough.lua"
+  rm -f "${WIREPLUMBER_SCRIPT_DIR}/90-linein-passthrough.lua"
 fi
 
 if (( install_service == 1 )); then
   systemctl --user daemon-reload
-  systemctl --user enable --now linein-passthrough-refresh.service
+  systemctl --user enable linein-passthrough-refresh.service
 fi
 
 "${BIN_DIR}/linein-passthrough" enable
@@ -103,5 +104,5 @@ printf 'Uninstall: %s\n' "${BIN_DIR}/linein-passthrough-uninstall"
 printf 'Status: run `linein-passthrough status`\n'
 
 if (( install_wireplumber_lua == 1 )); then
-  printf 'WirePlumber Lua helper installed. Restarting WirePlumber is handled by the CLI when needed.\n'
+  printf 'WirePlumber placeholder config installed. No Lua helper is currently needed.\n'
 fi
