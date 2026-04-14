@@ -1,0 +1,26 @@
+name: GitHub Publication
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync-source-and-pages:
+    runs-on: desktop-linein-passthrough
+    container:
+      image: oci.thepeoples.dev/platform/agent-base:git-f592788@sha256:6f371cbbc7fa031001ef121d5b01b818525d7a91e6f9b2fe868f0c68098af7bf
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish GitHub source and Pages
+        env:
+          PUBLISH_GITHUB_USERNAME: ${{ secrets.PUBLISH_GITHUB_USERNAME }}
+          PUBLISH_GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          PUBLISH_GITHUB_REPOSITORY: ${{ secrets.PUBLISH_GITHUB_REPOSITORY }}
+          PUBLISH_GITHUB_PAGES_BRANCH: ${{ secrets.PUBLISH_GITHUB_PAGES_BRANCH }}
+        run: bash scripts/publish-github-pages.sh
