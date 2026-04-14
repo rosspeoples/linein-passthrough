@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh line-in PipeWire loopback config
+After=pipewire.service wireplumber.service
+Wants=pipewire.service wireplumber.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/linein-passthrough-refresh --activate
+
+[Install]
+WantedBy=default.target

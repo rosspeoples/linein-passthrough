@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PREFIX=${XDG_CONFIG_HOME:-"${HOME}/.config"}
+BIN_DIR=${HOME}/.local/bin
+SYSTEMD_DIR=${PREFIX}/systemd/user
+PIPEWIRE_DIR=${PREFIX}/pipewire/pipewire.conf.d
+WIREPLUMBER_CONF_DIR=${PREFIX}/wireplumber/wireplumber.conf.d
+WIREPLUMBER_SCRIPT_DIR=${HOME}/.local/share/wireplumber/scripts
+
+usage() {
+  cat <<'EOF'
+Usage: linein-passthrough-uninstall [--keep-wireplumber-lua]
+
+Removes linein-passthrough from the current user profile.
+
+Options:
+  --keep-wireplumber-lua  Keep the optional WirePlumber Lua helper files.
+  -h, --help             Show this help.
+EOF
+}
+
+keep_wireplumber_lua=0
+
+while (($# > 0)); do
+  case "$1" in
+    --keep-wireplumber-lua)
+      keep_wireplumber_lua=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'Unknown option: %s\n' "$1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user disable --now linein-passthrough-refresh.service >/dev/null 2>&1 || true
+fi
+
+rm -f \
+  "${BIN_DIR}/linein-passthrough" \
+  "${BIN_DIR}/linein-passthrough-refresh" \
+  "${BIN_DIR}/linein-passthrough-uninstall" \
+  "${SYSTEMD_DIR}/linein-passthrough-refresh.service" \
+  "${PIPEWIRE_DIR}/90-linein-passthrough.conf" \
+  "${PIPEWIRE_DIR}/90-linein-passthrough.conf.disabled"
+
+if (( keep_wireplumber_lua == 0 )); then
+  rm -f \
+    "${WIREPLUMBER_CONF_DIR}/90-linein-passthrough.conf" \
+    "${WIREPLUMBER_SCRIPT_DIR}/90-linein-passthrough.lua"
+fi
+
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user daemon-reload >/dev/null 2>&1 || true
+  systemctl --user restart pipewire.service wireplumber.service >/dev/null 2>&1 || true
+fi
+
+printf 'linein-passthrough removed from %s\n' "$HOME"
+if (( keep_wireplumber_lua == 1 )); then
+  printf 'WirePlumber Lua helper was left in place.\n'
+fi

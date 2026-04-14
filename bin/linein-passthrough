@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REFRESH_BIN=${LINEIN_PASSTHROUGH_REFRESH_BIN:-"${HOME}/.local/bin/linein-passthrough-refresh"}
+if [[ ! -x "$REFRESH_BIN" ]]; then
+  SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+  LOCAL_REFRESH_BIN=$(cd -- "${SELF_DIR}/.." && pwd)/libexec/linein-passthrough-refresh
+  if [[ -x "$LOCAL_REFRESH_BIN" ]]; then
+    REFRESH_BIN=$LOCAL_REFRESH_BIN
+  fi
+fi
+STATE_DIR=${XDG_STATE_HOME:-"${HOME}/.local/state"}/linein-passthrough
+STATE_FILE=${STATE_DIR}/state.env
+CONFIG_DIR=${XDG_CONFIG_HOME:-"${HOME}/.config"}/pipewire/pipewire.conf.d
+CONFIG_FILE=${CONFIG_DIR}/90-linein-passthrough.conf
+
+usage() {
+  cat <<'EOF'
+Usage: linein-passthrough <enable|disable|toggle|status|refresh>
+
+Commands:
+  enable   Detect line-in, write the PipeWire loopback config, restart audio user services.
+  disable  Remove the generated loopback config and restart audio user services.
+  toggle   Toggle between enable and disable.
+  status   Print current status.
+  refresh  Re-detect line-in and rewrite the config if needed.
+EOF
+}
+
+notify() {
+  local title=$1
+  local body=$2
+  if command -v notify-send >/dev/null 2>&1 && [[ -n ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
+    notify-send "$title" "$body" || true
+  fi
+}
+
+require_refresh_bin() {
+  if [[ ! -x "$REFRESH_BIN" ]]; then
+    printf 'Missing helper: %s\n' "$REFRESH_BIN" >&2
+    exit 1
+  fi
+}
+
+restart_audio_services() {
+  systemctl --user restart pipewire.service wireplumber.service
+}
+
+load_state() {
+  if [[ -f "$STATE_FILE" ]]; then
+    # shellcheck disable=SC1090
+    source "$STATE_FILE"
+  else
+    enabled=0
+    detected_node_name=
+    detected_node_nick=
+    default_sink_name=
+  fi
+}
+
+cmd_enable() {
+  require_refresh_bin
+  "$REFRESH_BIN" --activate
+  notify "Line-In Passthrough" "Enabled"
+}
+
+cmd_disable() {
+  mkdir -p "$STATE_DIR"
+  rm -f "$CONFIG_FILE"
+  cat > "$STATE_FILE" <<'EOF'
+enabled=0
+detected_node_name=''
+detected_node_nick=''
+default_sink_name=''
+EOF
+  restart_audio_services
+  notify "Line-In Passthrough" "Disabled"
+  printf 'disabled\n'
+}
+
+cmd_toggle() {
+  if [[ -f "$CONFIG_FILE" ]]; then
+    cmd_disable
+  else
+    cmd_enable
+  fi
+}
+
+cmd_status() {
+  load_state
+  if [[ -f "$CONFIG_FILE" ]]; then
+    printf 'enabled\n'
+    printf 'config: %s\n' "$CONFIG_FILE"
+    [[ -n ${detected_node_name:-} ]] && printf 'line-in node: %s\n' "$detected_node_name"
+    [[ -n ${detected_node_nick:-} ]] && printf 'line-in nick: %s\n' "$detected_node_nick"
+    [[ -n ${default_sink_name:-} ]] && printf 'default sink: %s\n' "$default_sink_name"
+  else
+    printf 'disabled\n'
+  fi
+}
+
+cmd_refresh() {
+  require_refresh_bin
+  "$REFRESH_BIN"
+}
+
+case ${1:-} in
+  enable)
+    cmd_enable
+    ;;
+  disable)
+    cmd_disable
+    ;;
+  toggle)
+    cmd_toggle
+    ;;
+  status)
+    cmd_status
+    ;;
+  refresh)
+    cmd_refresh
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac
