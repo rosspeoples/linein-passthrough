@@ -43,7 +43,12 @@ printf '%s\n' "${REGISTRY_PASSWORD}" | "${container_engine}" login "${registry}"
 
 "${container_engine}" push "${image}:${version_tag}"
 
-digest="$("${container_engine}" image inspect --format '{{.Digest}}' "${image}:${version_tag}")"
+if [[ "${container_engine}" == "docker" ]]; then
+  repo_digest="$("${container_engine}" image inspect --format '{{index .RepoDigests 0}}' "${image}:${version_tag}")"
+  digest="${repo_digest##*@}"
+else
+  digest="$("${container_engine}" image inspect --format '{{.Digest}}' "${image}:${version_tag}")"
+fi
 if [[ -z "${digest}" || "${digest}" == "<no value>" ]]; then
   printf 'failed to resolve local image digest for %s:%s\n' "${image}" "${version_tag}" >&2
   exit 1
