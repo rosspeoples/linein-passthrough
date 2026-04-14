@@ -30,6 +30,34 @@ For the `Line-In Passthrough` sink to be visible in KDE Plasma, `Show Virtual De
 
 ## Quick Start
 
+Immutable-OS first distribution is the OCI installer image published to `ghcr.io/rosspeoples/linein-passthrough`.
+
+Example install with Podman:
+
+```bash
+podman run --rm \
+  --userns keep-id \
+  -e HOME \
+  -e XDG_RUNTIME_DIR \
+  -e DBUS_SESSION_BUS_ADDRESS \
+  -v "$HOME:$HOME" \
+  -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
+  ghcr.io/rosspeoples/linein-passthrough:latest install
+```
+
+For the optional WirePlumber placeholder config:
+
+```bash
+podman run --rm \
+  --userns keep-id \
+  -e HOME \
+  -e XDG_RUNTIME_DIR \
+  -e DBUS_SESSION_BUS_ADDRESS \
+  -v "$HOME:$HOME" \
+  -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
+  ghcr.io/rosspeoples/linein-passthrough:latest install --with-wireplumber-config
+```
+
 From the project directory:
 
 ```bash
@@ -84,6 +112,19 @@ linein-passthrough refresh
 ```
 
 ## Uninstall
+
+OCI uninstall:
+
+```bash
+podman run --rm \
+  --userns keep-id \
+  -e HOME \
+  -e XDG_RUNTIME_DIR \
+  -e DBUS_SESSION_BUS_ADDRESS \
+  -v "$HOME:$HOME" \
+  -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
+  ghcr.io/rosspeoples/linein-passthrough:latest uninstall
+```
 
 ```bash
 make uninstall

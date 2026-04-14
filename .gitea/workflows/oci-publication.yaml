@@ -1,0 +1,32 @@
+name: OCI Publication
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  publish-oci-image:
+    runs-on: desktop-linein-passthrough
+    container:
+      image: oci.thepeoples.dev/platform/agent-node:git-f592788@sha256:77de4343c54fc810679660ba4d419b71ec80b4e67eea764cbd3b2cca6b2ce9f7
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish OCI installer image
+        env:
+          OCI_IMAGE: ghcr.io/rosspeoples/linein-passthrough
+          OCI_REGISTRY_USERNAME: ${{ secrets.PUBLISH_GITHUB_USERNAME }}
+          OCI_REGISTRY_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          OCI_VERSION_TAG: ${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
+          OCI_LATEST_TAG: latest
+        run: bash scripts/publish-oci-image.sh

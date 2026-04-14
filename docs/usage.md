@@ -1,5 +1,65 @@
 # Usage
 
+## OCI Installer
+
+Primary immutable-OS distribution is the OCI installer image:
+
+```bash
+ghcr.io/rosspeoples/linein-passthrough:latest
+```
+
+Install:
+
+```bash
+podman run --rm \
+  --userns keep-id \
+  -e HOME \
+  -e XDG_RUNTIME_DIR \
+  -e DBUS_SESSION_BUS_ADDRESS \
+  -v "$HOME:$HOME" \
+  -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
+  ghcr.io/rosspeoples/linein-passthrough:latest install
+```
+
+Install with optional WirePlumber placeholder config:
+
+```bash
+podman run --rm \
+  --userns keep-id \
+  -e HOME \
+  -e XDG_RUNTIME_DIR \
+  -e DBUS_SESSION_BUS_ADDRESS \
+  -v "$HOME:$HOME" \
+  -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
+  ghcr.io/rosspeoples/linein-passthrough:latest install --with-wireplumber-config
+```
+
+Uninstall:
+
+```bash
+podman run --rm \
+  --userns keep-id \
+  -e HOME \
+  -e XDG_RUNTIME_DIR \
+  -e DBUS_SESSION_BUS_ADDRESS \
+  -v "$HOME:$HOME" \
+  -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
+  ghcr.io/rosspeoples/linein-passthrough:latest uninstall
+```
+
+To keep the placeholder config:
+
+```bash
+podman run --rm \
+  --userns keep-id \
+  -e HOME \
+  -e XDG_RUNTIME_DIR \
+  -e DBUS_SESSION_BUS_ADDRESS \
+  -v "$HOME:$HOME" \
+  -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
+  ghcr.io/rosspeoples/linein-passthrough:latest uninstall --keep-wireplumber-config
+```
+
 ## Commands
 
 ```bash
