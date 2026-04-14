@@ -26,6 +26,8 @@ It is built for KDE on Bazzite, but the approach is generic and works on modern 
 
 `notify-send` is optional.
 
+For the `Line-In Passthrough` sink to be visible in KDE Plasma, `Show Virtual Devices` must be enabled in the audio device UI.
+
 ## Quick Start
 
 From the project directory:
