@@ -19,9 +19,10 @@ jobs:
 
       - name: Publish OCI installer image
         env:
-          OCI_IMAGE: ghcr.io/rosspeoples/linein-passthrough
-          OCI_REGISTRY_USERNAME: ${{ secrets.PUBLISH_GITHUB_USERNAME }}
-          OCI_REGISTRY_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
-          OCI_VERSION_TAG: ${{ github.sha }}
-          OCI_LATEST_TAG: latest
+          OCI_REGISTRY: ${{ secrets.OCI_REGISTRY }}
+          OCI_IMAGE: ${{ secrets.OCI_IMAGE }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          OCI_TAG_ALIAS: ${{ secrets.OCI_TAG_ALIAS }}
+          GITEA_SHA: ${{ gitea.sha }}
         run: bash scripts/publish-oci-image.sh
