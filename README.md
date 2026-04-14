@@ -32,10 +32,18 @@ For the `Line-In Passthrough` sink to be visible in KDE Plasma, `Show Virtual De
 
 Immutable-OS first distribution is the OCI installer image published to `ghcr.io/rosspeoples/linein-passthrough`.
 
+Preferred immutable tags:
+
+- `git-<shortsha>`
+- `sha256-<manifestdigest>`
+
+`latest` is only a convenience alias and should not be treated as the stable deployment contract.
+
 Example install with Podman:
 
 ```bash
 podman run --rm \
+  --security-opt label=disable \
   --userns keep-id \
   -e HOME \
   -e XDG_RUNTIME_DIR \
@@ -49,6 +57,7 @@ For the optional WirePlumber placeholder config:
 
 ```bash
 podman run --rm \
+  --security-opt label=disable \
   --userns keep-id \
   -e HOME \
   -e XDG_RUNTIME_DIR \
@@ -56,6 +65,15 @@ podman run --rm \
   -v "$HOME:$HOME" \
   -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
   ghcr.io/rosspeoples/linein-passthrough:latest install --with-wireplumber-config
+```
+
+On SELinux-enforcing systems, `--security-opt label=disable` is required for the container to write into your mounted home directory.
+
+If the container cannot reach your host user systemd bus, the install still writes the files but may warn instead of reloading or restarting services from inside the container. In that case, run:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user restart pipewire.service wireplumber.service
 ```
 
 From the project directory:
@@ -117,6 +135,7 @@ OCI uninstall:
 
 ```bash
 podman run --rm \
+  --security-opt label=disable \
   --userns keep-id \
   -e HOME \
   -e XDG_RUNTIME_DIR \

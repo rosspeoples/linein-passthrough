@@ -56,6 +56,14 @@ require_cmd jq
 require_cmd systemctl
 require_cmd pactl
 
+restart_user_audio_services() {
+  if systemctl --user restart --no-block pipewire.service wireplumber.service; then
+    return 0
+  fi
+  printf 'Warning: could not restart user audio services from this environment. Restart PipeWire and WirePlumber in your host session if needed.\n' >&2
+  return 1
+}
+
 mkdir -p "$STATE_DIR" "$CONFIG_DIR"
 
 pw_dump=$(pw-dump)
@@ -301,7 +309,7 @@ detected_node_id='${linein_id}'
 EOF
 
 if (( ACTIVATE == 1 )) && (( changed == 1 )); then
-  systemctl --user restart --no-block pipewire.service wireplumber.service
+  restart_user_audio_services || true
 fi
 
 # Default the analog line-in capture volume to a safer level to reduce clipping.

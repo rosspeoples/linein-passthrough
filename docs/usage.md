@@ -8,10 +8,18 @@ Primary immutable-OS distribution is the OCI installer image:
 ghcr.io/rosspeoples/linein-passthrough:latest
 ```
 
+Preferred immutable references:
+
+```bash
+ghcr.io/rosspeoples/linein-passthrough:git-<shortsha>
+ghcr.io/rosspeoples/linein-passthrough:sha256-<manifestdigest>
+```
+
 Install:
 
 ```bash
 podman run --rm \
+  --security-opt label=disable \
   --userns keep-id \
   -e HOME \
   -e XDG_RUNTIME_DIR \
@@ -25,6 +33,7 @@ Install with optional WirePlumber placeholder config:
 
 ```bash
 podman run --rm \
+  --security-opt label=disable \
   --userns keep-id \
   -e HOME \
   -e XDG_RUNTIME_DIR \
@@ -38,6 +47,7 @@ Uninstall:
 
 ```bash
 podman run --rm \
+  --security-opt label=disable \
   --userns keep-id \
   -e HOME \
   -e XDG_RUNTIME_DIR \
@@ -51,6 +61,7 @@ To keep the placeholder config:
 
 ```bash
 podman run --rm \
+  --security-opt label=disable \
   --userns keep-id \
   -e HOME \
   -e XDG_RUNTIME_DIR \
@@ -58,6 +69,15 @@ podman run --rm \
   -v "$HOME:$HOME" \
   -v "$XDG_RUNTIME_DIR:$XDG_RUNTIME_DIR" \
   ghcr.io/rosspeoples/linein-passthrough:latest uninstall --keep-wireplumber-config
+```
+
+On SELinux-enforcing systems, `--security-opt label=disable` is required for these bind mounts.
+
+If the container cannot reach your host user systemd bus, install still writes the files but may warn instead of reloading or restarting services from inside the container. Run this in the host session afterward if needed:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user restart pipewire.service wireplumber.service
 ```
 
 ## Commands
